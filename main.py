@@ -14,8 +14,8 @@ async def main():
         raise Exception("no github token provided")
 
     github_client = GithubClient(token=github_token)
-    user_result = await github_client.get_user(username="kamaal111")
-    match user_result:
+    issues_result = await github_client.get_issues()
+    match issues_result:
         case Failure(error):
             print(f"what a failure {error=}")
         case Success(data):

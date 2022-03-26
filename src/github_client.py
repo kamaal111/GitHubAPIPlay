@@ -45,6 +45,10 @@ class GithubIssuesClient(BaseGithubClient):
 class GithubClient:
     def __init__(self, *, token: str):
         self._users_client = GithubUsersClient(token=token)
+        self._issues_client = GithubIssuesClient(token=token)
 
     def get_user(self, *, username: str):
         return self._users_client.get_user(username=username)
+
+    def get_issues(self):
+        return self._issues_client.get_issues()

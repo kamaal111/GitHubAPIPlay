@@ -21,6 +21,7 @@ class RequestException(Exception):
     ) -> None:
         self.status_code = status_code
         self.data = data
+        super().__init__(data.get("message"))
 
 
 async def make_requests(
