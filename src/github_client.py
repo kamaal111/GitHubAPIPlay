@@ -1,13 +1,6 @@
-import json
-import requests
-from typing import TYPE_CHECKING
-from requests.exceptions import HTTPError
 from os import path
-from returns.result import Success, Failure
 
-if TYPE_CHECKING:
-    from typing import Any, Dict
-    from returns.result import Result
+from .utils.make_request import HTTPMethods, make_requests
 
 
 _BASE_URL = "https://api.github.com/"
@@ -19,6 +12,10 @@ class BaseGithubClient:
     def __init__(self, *, token: str):
         self.token = token
 
+    @property
+    def default_headers(self):
+        return {"Authorization": f"token: {self.token}"}
+
     def url(self, rest: str = ""):
         return path.join(_BASE_URL, self.path, rest)
 
@@ -26,16 +23,23 @@ class BaseGithubClient:
 class GithubUsersClient(BaseGithubClient):
     path = "users"
 
-    def get_user(self, *, username: str) -> "Result[Dict[str, Any], HTTPError]":
+    def get_user(self, *, username: str):
         url = self.url(username)
-        response = requests.get(url)
-        try:
-            response.raise_for_status()
-        except HTTPError as error:
-            return Failure(error)
+        response_result = make_requests(
+            method=HTTPMethods.GET, url=url, headers=self.default_headers
+        )
+        return response_result
 
-        data = json.loads(response.content)
-        return Success(data)
+
+class GithubIssuesClient(BaseGithubClient):
+    path = "issues"
+
+    def get_issues(self):
+        url = self.url()
+        response_result = make_requests(
+            method=HTTPMethods.GET, url=url, headers=self.default_headers
+        )
+        return response_result
 
 
 class GithubClient:
