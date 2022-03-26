@@ -1,6 +1,10 @@
 from os import path
+from typing import TYPE_CHECKING
 
-from .utils.make_request import HTTPMethods, make_requests
+from .utils.requests import HTTPMethods, Requests
+
+if TYPE_CHECKING:
+    from typing import Any, Dict
 
 
 _BASE_URL = "https://api.github.com/"
@@ -25,10 +29,10 @@ class GithubUsersClient(BaseGithubClient):
 
     def get_user(self, *, username: str):
         url = self.url(username)
-        response_result = make_requests(
+        request: "Requests[Dict[str, Any]]" = Requests(
             method=HTTPMethods.GET, url=url, headers=self.default_headers
         )
-        return response_result
+        return request.execute()
 
 
 class GithubIssuesClient(BaseGithubClient):
@@ -36,10 +40,10 @@ class GithubIssuesClient(BaseGithubClient):
 
     def get_issues(self):
         url = self.url()
-        response_result = make_requests(
+        request: "Requests[Dict[str, Any]]" = Requests(
             method=HTTPMethods.GET, url=url, headers=self.default_headers
         )
-        return response_result
+        return request.execute()
 
 
 class GithubClient:
