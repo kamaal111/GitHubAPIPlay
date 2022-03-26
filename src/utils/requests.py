@@ -38,7 +38,7 @@ class Requests(Generic[REQUEST_TYPEVAR]):
     def __init__(
         self,
         *,
-        method: HTTPMethods,
+        method: "HTTPMethods",
         url: str,
         headers: "Optional[Dict[str, Any]]" = None,
         body: "Optional[Dict[str, Any]]" = None,

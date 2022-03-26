@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from .utils.requests import HTTPMethods, Requests
 
 if TYPE_CHECKING:
-    from typing import Optional, List
+    from typing import Optional, List, Any, Dict
     from .typing import Issue
 
 
@@ -62,11 +62,17 @@ class GitHubReposClient(BaseGithubClient):
         repo_name: str,
         title: str,
         description: "Optional[str]" = None,
+        assignee: "Optional[str]" = None,
+        labels: "Optional[List[str]]" = None,
     ):
         url = self.url(f"{username}/{repo_name}/issues")
-        payload = {"title": title}
+        payload: "Dict[str, Any]" = {"title": title}
         if description:
             payload["body"] = description
+        if assignee:
+            payload["assignee"] = assignee
+        if labels:
+            payload["labels"] = labels
 
         request: "Requests[Issue]" = Requests(
             method=HTTPMethods.POST,
@@ -97,7 +103,14 @@ class GithubClient:
         repo_name: str,
         title: str,
         description: "Optional[str]" = None,
+        assignee: "Optional[str]" = None,
+        labels: "Optional[List[str]]" = None,
     ):
         return self._repos_client.create_issue(
-            username=username, repo_name=repo_name, title=title, description=description
+            username=username,
+            repo_name=repo_name,
+            title=title,
+            description=description,
+            assignee=assignee,
+            labels=labels,
         )
