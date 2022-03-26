@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING
+import asyncio
 import requests
+from typing import TYPE_CHECKING
 from requests.exceptions import HTTPError
 from enum import Enum
 from returns.result import Success, Failure
@@ -22,7 +23,7 @@ class RequestException(Exception):
         self.data = data
 
 
-def make_requests(
+async def make_requests(
     *, method: HTTPMethods, url: str, headers: "Optional[Dict[str, Any]]" = None
 ) -> "Result[Dict[str, Any], RequestException]":
     request_method = None
@@ -32,7 +33,11 @@ def make_requests(
         case _:
             return Failure(RequestException(data={"message": "Invalid HTTP method"}))
 
-    response = request_method(url, headers=headers)
+    def do_request():
+        return request_method(url, headers=headers)
+
+    event_loop = asyncio.get_event_loop()
+    response = await event_loop.run_in_executor(None, do_request)
     try:
         response.raise_for_status()
     except HTTPError as error:
