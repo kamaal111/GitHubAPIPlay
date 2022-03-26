@@ -13,7 +13,7 @@ async def main():
     if not github_token:
         raise Exception("no github token provided")
 
-    github_client = GithubClient(token=github_token)
+    github_client = GithubClient(username="kamaal111", token=github_token)
     issues_result = await github_client.create_issue(
         username="kamaal111", repo_name="GitHubAPIPlay", title="Test", body="Testing"
     )

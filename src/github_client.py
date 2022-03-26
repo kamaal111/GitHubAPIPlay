@@ -13,7 +13,8 @@ _BASE_URL = "https://api.github.com/"
 class BaseGithubClient:
     path = ""
 
-    def __init__(self, *, token: str):
+    def __init__(self, *, username: str, token: str):
+        self.username = username
         self.token = token
 
     @property
@@ -22,7 +23,7 @@ class BaseGithubClient:
 
     @property
     def default_auth(self):
-        return ("kamaal111", self.token)
+        return (self.username, self.token)
 
     def url(self, rest: str = ""):
         return path.join(_BASE_URL, self.path, rest)
@@ -50,8 +51,8 @@ class GitHubReposClient(BaseGithubClient):
 
 
 class GithubClient:
-    def __init__(self, *, token: str):
-        self._repos_client = GitHubReposClient(token=token)
+    def __init__(self, *, username: str, token: str):
+        self._repos_client = GitHubReposClient(username=username, token=token)
 
     def create_issue(
         self, *, username: str, repo_name: str, title: str, body: "Optional[str]" = None
