@@ -52,7 +52,7 @@ class Requests(Generic[REQUEST_TYPEVAR]):
         def do_request():
             return request_method(self.url, headers=self.headers)
 
-        event_loop = asyncio.get_event_loop()
+        event_loop = asyncio.get_running_loop()
         response = await event_loop.run_in_executor(None, do_request)
         try:
             response.raise_for_status()
