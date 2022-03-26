@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 from .utils.requests import HTTPMethods, Requests
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
+    from typing import Optional, List
+    from .typing import Issue
 
 
 _BASE_URL = "https://api.github.com/"
@@ -32,6 +33,17 @@ class BaseGithubClient:
 class GitHubReposClient(BaseGithubClient):
     path = "repos"
 
+    def get_issues(self, *, username: str, repo_name: str):
+        url = self.url(f"{username}/{repo_name}/issues")
+
+        request: "Requests[List[Issue]]" = Requests(
+            method=HTTPMethods.POST,
+            url=url,
+            headers=self.default_headers,
+            auth=self.default_auth,
+        )
+        return request.execute()
+
     def create_issue(
         self, *, username: str, repo_name: str, title: str, body: "Optional[str]" = None
     ):
@@ -40,7 +52,7 @@ class GitHubReposClient(BaseGithubClient):
         if body:
             payload["body"] = body
 
-        request: "Requests[Dict[str, Any]]" = Requests(
+        request: "Requests[Issue]" = Requests(
             method=HTTPMethods.POST,
             url=url,
             headers=self.default_headers,
