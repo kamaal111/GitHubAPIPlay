@@ -14,10 +14,12 @@ async def main():
         raise Exception("no github token provided")
 
     github_client = GithubClient(token=github_token)
-    issues_result = await github_client.get_issues()
+    issues_result = await github_client.create_issue(
+        username="kamaal111", repo_name="GitHubAPIPlay", title="Test", body="Testing"
+    )
     match issues_result:
         case Failure(error):
-            print(f"what a failure {error=}")
+            print(f"{error.status_code}: what a failure {error}")
         case Success(data):
             print(f"success {data=}")
 

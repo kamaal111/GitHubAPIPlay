@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from .utils.requests import HTTPMethods, Requests
 
 if TYPE_CHECKING:
-    from typing import Any, Dict
+    from typing import Any, Dict, Optional
 
 
 _BASE_URL = "https://api.github.com/"
@@ -18,41 +18,44 @@ class BaseGithubClient:
 
     @property
     def default_headers(self):
-        return {"Authorization": f"token: {self.token}"}
+        return {"accept": "application/vnd.github.v3+json"}
+
+    @property
+    def default_auth(self):
+        return ("kamaal111", self.token)
 
     def url(self, rest: str = ""):
         return path.join(_BASE_URL, self.path, rest)
 
 
-class GithubUsersClient(BaseGithubClient):
-    path = "users"
+class GitHubReposClient(BaseGithubClient):
+    path = "repos"
 
-    def get_user(self, *, username: str):
-        url = self.url(username)
+    def create_issue(
+        self, *, username: str, repo_name: str, title: str, body: "Optional[str]" = None
+    ):
+        url = self.url(f"{username}/{repo_name}/issues")
+        payload = {"title": title}
+        if body:
+            payload["body"] = body
+
         request: "Requests[Dict[str, Any]]" = Requests(
-            method=HTTPMethods.GET, url=url, headers=self.default_headers
-        )
-        return request.execute()
-
-
-class GithubIssuesClient(BaseGithubClient):
-    path = "issues"
-
-    def get_issues(self):
-        url = self.url()
-        request: "Requests[Dict[str, Any]]" = Requests(
-            method=HTTPMethods.GET, url=url, headers=self.default_headers
+            method=HTTPMethods.POST,
+            url=url,
+            headers=self.default_headers,
+            body=payload,
+            auth=self.default_auth,
         )
         return request.execute()
 
 
 class GithubClient:
     def __init__(self, *, token: str):
-        self._users_client = GithubUsersClient(token=token)
-        self._issues_client = GithubIssuesClient(token=token)
+        self._repos_client = GitHubReposClient(token=token)
 
-    def get_user(self, *, username: str):
-        return self._users_client.get_user(username=username)
-
-    def get_issues(self):
-        return self._issues_client.get_issues()
+    def create_issue(
+        self, *, username: str, repo_name: str, title: str, body: "Optional[str]" = None
+    ):
+        return self._repos_client.create_issue(
+            username=username, repo_name=repo_name, title=title, body=body
+        )
