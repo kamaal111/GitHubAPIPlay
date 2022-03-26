@@ -29,7 +29,7 @@ class IssueLabel(TypedDict):
     id: int
     url: str
     name: str
-    description: "Optional[str]"
+    description: str
     color: str
     default: bool
 

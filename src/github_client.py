@@ -37,7 +37,18 @@ class GitHubReposClient(BaseGithubClient):
         url = self.url(f"{username}/{repo_name}/issues")
 
         request: "Requests[List[Issue]]" = Requests(
-            method=HTTPMethods.POST,
+            method=HTTPMethods.GET,
+            url=url,
+            headers=self.default_headers,
+            auth=self.default_auth,
+        )
+        return request.execute()
+
+    def get_issue(self, *, username: str, repo_name: str, issue_number: int):
+        url = self.url(f"{username}/{repo_name}/issues/{issue_number}")
+
+        request: "Requests[Issue]" = Requests(
+            method=HTTPMethods.GET,
             url=url,
             headers=self.default_headers,
             auth=self.default_auth,
@@ -45,12 +56,17 @@ class GitHubReposClient(BaseGithubClient):
         return request.execute()
 
     def create_issue(
-        self, *, username: str, repo_name: str, title: str, body: "Optional[str]" = None
+        self,
+        *,
+        username: str,
+        repo_name: str,
+        title: str,
+        description: "Optional[str]" = None,
     ):
         url = self.url(f"{username}/{repo_name}/issues")
         payload = {"title": title}
-        if body:
-            payload["body"] = body
+        if description:
+            payload["body"] = description
 
         request: "Requests[Issue]" = Requests(
             method=HTTPMethods.POST,
@@ -66,9 +82,22 @@ class GithubClient:
     def __init__(self, *, username: str, token: str):
         self._repos_client = GitHubReposClient(username=username, token=token)
 
+    def get_issues(self, *, username: str, repo_name: str):
+        return self._repos_client.get_issues(username=username, repo_name=repo_name)
+
+    def get_issue(self, *, username: str, repo_name: str, issue_number: int):
+        return self._repos_client.get_issue(
+            username=username, repo_name=repo_name, issue_number=issue_number
+        )
+
     def create_issue(
-        self, *, username: str, repo_name: str, title: str, body: "Optional[str]" = None
+        self,
+        *,
+        username: str,
+        repo_name: str,
+        title: str,
+        description: "Optional[str]" = None,
     ):
         return self._repos_client.create_issue(
-            username=username, repo_name=repo_name, title=title, body=body
+            username=username, repo_name=repo_name, title=title, description=description
         )
